@@ -9993,6 +9993,22 @@ proc load_image_bin @{fname foffset address length @} @{
 @end example
 @end deffn
 
+@deffn {Command} {image_info} filename [@option{bin}|@option{ihex}|@option{elf}|@option{s19}]
+Returns a Tcl dict describing the image without loading it to target memory.
+The dict always contains a @option{type} key with the detected or specified image type
+(@option{bin}, @option{ihex}, @option{elf}, or @option{s19}).
+If the image carries an entry point (ELF @code{e_entry}, or IHEX record type 05),
+an @option{entry_address} key is also present with its value.
+@example
+set info [image_info firmware.elf]
+# info => "type elf entry_address 0xfffc0000"
+dict get $info type
+# => elf
+dict get $info entry_address
+# => 0xfffc0000
+@end example
+@end deffn
+
 @deffn {Command} {test_image} filename [address [@option{bin}|@option{ihex}|@option{elf}]]
 Displays image section sizes and addresses
 as if @var{filename} were loaded into target memory

@@ -3713,6 +3713,31 @@ COMMAND_HANDLER(handle_load_image_command)
 
 }
 
+COMMAND_HANDLER(handle_image_info_command)
+{
+	if (CMD_ARGC < 1 || CMD_ARGC > 2)
+		return ERROR_COMMAND_SYNTAX_ERROR;
+
+	struct image image;
+	image.base_address_set = false;
+	image.base_address = 0;
+	image.start_address_set = false;
+
+	int retval = image_open(&image, CMD_ARGV[0], (CMD_ARGC == 2) ? CMD_ARGV[1] : NULL);
+	if (retval != ERROR_OK)
+		return retval;
+
+	if (image.start_address_set)
+		command_print(CMD, "type %s entry_address 0x%08" PRIx32,
+			image_type_name(image.type), image.start_address);
+	else
+		command_print(CMD, "type %s",
+			image_type_name(image.type));
+
+	image_close(&image);
+	return ERROR_OK;
+}
+
 COMMAND_HANDLER(handle_dump_image_command)
 {
 	struct fileio *fileio;
@@ -6774,6 +6799,13 @@ static const struct command_registration target_exec_command_handlers[] = {
 		.mode = COMMAND_EXEC,
 		.usage = "filename [address ['bin'|'ihex'|'elf'|'s19' "
 			"[min_address [max_length]]]]",
+	},
+	{
+		.name = "image_info",
+		.handler = handle_image_info_command,
+		.mode = COMMAND_ANY,
+		.help = "Returns a dict with the image type and, if present, entry address.",
+		.usage = "filename ['bin'|'ihex'|'elf'|'s19']",
 	},
 	{
 		.name = "dump_image",
